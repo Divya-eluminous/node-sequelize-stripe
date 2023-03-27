@@ -5,6 +5,7 @@ const sequelize = require('sequelize');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')('sk_test_51JnLcFSCWP0clihbN4kP4NX4jDxzGBvuvzgc3itc84yKiT8yyfd6fhfInu5Y2m3ghBfuOysnk4jZYSo7YIxWMn4200wLTCrETJ');
 
 
 async function getUserList(req,res)
@@ -38,23 +39,45 @@ async function createUser(req,res)
     const userData ={
         first_name:req.body.first_name,
         last_name:req.body.last_name,
-        email:req.body.email
+        email:req.body.email,
+        access_token:''
     }
     userData.password = await bcrypt.hash(req.body.password,10);
-
     const data = new models.userModel(userData);
-    data.save().then((result)=>{
-       // console.log(result);
-        res.send({
-            status:'success',
-            error:null,
-            data:null,
-            message:"Users created successfully."
-        });
+    data.save().then(async(result)=>{
+       const customer = await stripe.customers.create({
+        email: req.body.email,
+        description: req.body.first_name+' '+req.body.last_name, // token representing the user's payment information
+       }).then(async(stripeResult)=>{    
+          //console.log(stripeResult);
+          var updateCustomerId = await models.userModel.update({stripe_customer_id:stripeResult.id},{where:{id:result.id}})
+          .then((data)=>{    
+                res.send({
+                    status:'success',
+                    error:null,
+                    data:null,
+                    message:"Users created successfully."
+                });
+            }).catch((error)=>{
+                res.send({
+                    status:'error',
+                    error:error.message,
+                    data:null,
+                    message:"Users not created."
+                });
+            }); 
+      }).catch((error)=>{
+            res.send({
+                status:'error',
+                error:error.message,
+                data:null,
+                message:"Users not created."
+            });
+      }); 
     }).catch((error)=>{
         res.send({
             status:'error',
-            error:null,
+            error:error.message,
             data:null,
             message:"Users not created."
         });

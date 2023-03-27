@@ -28,6 +28,10 @@ const userModel = sequelize.define('User', {
     access_token:{
       type:DataTypes.TEXT,
       allowNull:false
+    },
+    stripe_customer_id:{
+      type:DataTypes.TEXT,
+      allowNull:true
     }
   },
   {
