@@ -45,19 +45,48 @@ async function createUser(req,res)
     userData.password = await bcrypt.hash(req.body.password,10);
     const data = new models.userModel(userData);
     data.save().then(async(result)=>{
+
        const customer = await stripe.customers.create({
         email: req.body.email,
         description: req.body.first_name+' '+req.body.last_name, // token representing the user's payment information
-       }).then(async(stripeResult)=>{    
-          //console.log(stripeResult);
-          var updateCustomerId = await models.userModel.update({stripe_customer_id:stripeResult.id},{where:{id:result.id}})
-          .then((data)=>{    
-                res.send({
-                    status:'success',
-                    error:null,
-                    data:null,
-                    message:"Users created successfully."
-                });
+       }).then(async(stripeResult)=>{  
+
+             // Create a payment method and attach it to the customer
+            const paymentMethods = await stripe.paymentMethods.create({
+                type: 'card',
+                card: {
+                number: '4242424242424242',
+                exp_month: 12,
+                exp_year: 2030,
+                cvc: '123',
+                },
+            });
+            console.log(paymentMethods);
+            await stripe.paymentMethods.attach(paymentMethods.id, { customer: stripeResult.id });
+
+            // Set the payment method as the customer's default payment method
+            await stripe.customers.update(stripeResult.id, {
+                invoice_settings: {
+                default_payment_method: paymentMethods.id,
+                },
+            }).then(async(resul)=>{
+                    //console.log(stripeResult);
+                    var updateCustomerId = await models.userModel.update({stripe_customer_id:stripeResult.id,payment_method:paymentMethods.id},{where:{id:result.id}})
+                    .then((data)=>{    
+                            res.send({
+                                status:'success',
+                                error:null,
+                                data:null,
+                                message:"Users created successfully."
+                            });
+                        }).catch((error)=>{
+                            res.send({
+                                status:'error',
+                                error:error.message,
+                                data:null,
+                                message:"Users not created."
+                            });
+                        }); 
             }).catch((error)=>{
                 res.send({
                     status:'error',
@@ -66,6 +95,8 @@ async function createUser(req,res)
                     message:"Users not created."
                 });
             }); 
+
+        
       }).catch((error)=>{
             res.send({
                 status:'error',

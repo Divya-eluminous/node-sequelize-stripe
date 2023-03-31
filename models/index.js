@@ -18,6 +18,8 @@ const db={};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 db.userModel = require('./userModel')(sequelize,DataTypes);
+db.stripePlansModel = require('./stripePlansModel')(sequelize,DataTypes);
+db.stripeProductModel = require('./stripeProductModel')(sequelize,DataTypes);
 
 db.sequelize.sync({ force: false,alter:false }).then(()=>{
     console.log("All models were synchronized successfully.");

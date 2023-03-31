@@ -8,8 +8,7 @@ const userRoute = require('../routes/userRoutes');
 const stripeRoute = require('../routes/stripeRoutes');
 
 module.exports = function(app){
-   console.log('in router.js file');
-
+  console.log('in router.js file');
   app.use('/api/user/',userRoute);
   app.use('/api/stripe/',stripeRoute);
 

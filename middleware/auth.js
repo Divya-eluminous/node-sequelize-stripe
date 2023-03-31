@@ -5,7 +5,7 @@ const allModels = require('../models');
 function generateToken(userData)
 {
     // const token = jwt.sign({userData}, 'Mysecretkey', { expiresIn: '1h' });
-    const token = jwt.sign({userData}, 'Mysecretkey', { expiresIn: '5m' });
+    const token = jwt.sign({userData}, 'Mysecretkey', { expiresIn: '1h' });
     return token;
 }
 async function verifyToken(req,res,next){
@@ -19,7 +19,7 @@ async function verifyToken(req,res,next){
         return res.status(403).send('Token is required');
     }    
     try{
-        let checkLoginUser = await allModels.userModel.findOne({where:{id:req.params.id},attributes:['id','access_token']});
+        let checkLoginUser = await allModels.userModel.findOne({where:{id:req.body.id},attributes:['id','access_token']});
         if(checkLoginUser){
             var dbAccessToken = checkLoginUser['access_token'];
            if(dbAccessToken===headToken)

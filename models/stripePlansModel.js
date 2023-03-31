@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes,sequelize  } = require('sequelize');
 module.exports = (sequelize, Sequelize) => {
 
-const userModel = sequelize.define('User', {
+const stripePlansModel = sequelize.define('stripe_plans', {
     // Model attributes are defined here
     id:
     {
@@ -9,45 +9,41 @@ const userModel = sequelize.define('User', {
         autoIncrement: true,
         primaryKey: true
     },
-    first_name: {
+    product_id: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
-    last_name: {
+    plan_id: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
-    email: {
+    currency: {
       type: DataTypes.STRING,
-      allowNull: false      
+      allowNull: true
     },
-    password: {
+    plan_interval: {
       type: DataTypes.STRING,
-      allowNull: false      
+      allowNull: true      
     },
-    access_token:{
-      type:DataTypes.TEXT,
-      allowNull:false
+    amount: {
+      type: DataTypes.STRING,
+      allowNull: true      
     },
-    stripe_customer_id:{
-      type:DataTypes.TEXT,
-      allowNull:true
-    },
-    payment_method:{
+    interval_count:{
       type:DataTypes.TEXT,
       allowNull:true
-    }
+    }   
   },
   {
     // Other model options go here
     freezeTableName: true,
     timestamps: true,
-    tableName: 'users',
+    tableName: 'stripe_plans',
     createdAt:"created_at",
     updatedAt:"updated_at",
     deletedAt:"deleted_at"
   }
  );
- return userModel;
+ return stripePlansModel;
 };
   

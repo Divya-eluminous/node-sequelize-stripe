@@ -11,5 +11,10 @@ const stripeController = require('../controller/stripeController');
 console.log('in stripe router.js file');
 
 router.post('/create-customer',stripeController.createCustomer);
+router.post('/create-plan',stripeController.createSubscriptionPlan);
+router.post('/create-product',stripeController.createSubscriptionProduct);
+router.post('/create-subscription',verifyToken,stripeController.createSubscription);
+
+
 
 module.exports=router;
